@@ -6,7 +6,7 @@ class SendMessageUseCase {
 
   SendMessageUseCase(this.repository);
 
-  Future<List<ChatMessage>> call(String message) async {
-    return await repository.sendMessage(message);
+  Future<List<ChatMessage>> call(String message) {
+    return repository.sendMessage(message);
   }
 }

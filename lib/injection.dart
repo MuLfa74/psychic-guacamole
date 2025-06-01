@@ -1,30 +1,31 @@
-import 'package:dio/dio.dart';
-import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:get_it/get_it.dart';
+import 'package:dio/dio.dart';
 
-// Chat Feature
 import 'features/chat/data/datasources/chat_api_data_source.dart';
-import 'features/chat/data/repositories/chat_repository_impl.dart';
-import 'features/chat/domain/repositories/chat_repository.dart';
-import 'features/chat/domain/usecases/send_message_usecase.dart';
+import 'features/chat/data/datasources/auth_data_source.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initDependencies() async {
-  await dotenv.load(fileName: ".env");
-  sl.registerLazySingleton<Dio>(() => Dio());
-  sl.registerLazySingleton<ChatApiDataSource>(
-    () => ChatApiDataSourceImpl(
-      dio: sl<Dio>(),
-      apiKey: dotenv.env['GIGACHAT_APIKEY']!,
+  await dotenv.load(fileName: '.env');
+
+  final dio = Dio();
+  sl.registerLazySingleton(() => dio);
+
+  sl.registerLazySingleton<AuthDataSource>(
+    () => AuthDataSource(
+      dio: dio,
+      authKey: dotenv.env['AUTHORIZATION_KEY']!,
     ),
   );
 
-  sl.registerLazySingleton<ChatRepository>(
-    () => ChatRepositoryImpl(sl<ChatApiDataSource>()),
+  sl.registerLazySingleton<ChatApiDataSource>(
+    () => ChatApiDataSourceImpl(
+      dio: dio,
+      authDataSource: sl<AuthDataSource>(),
+    ),
   );
 
-  sl.registerLazySingleton<SendMessageUseCase>(
-    () => SendMessageUseCase(sl<ChatRepository>()),
-  );
+  // + репозиторий, useCase и т.д.
 }

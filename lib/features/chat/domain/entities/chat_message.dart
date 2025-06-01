@@ -1,11 +1,9 @@
 class ChatMessage {
-  final String text;
-  final bool isUser;
-  final DateTime timestamp;
+  final String role; // 'user' или 'assistant'
+  final String content;
 
   ChatMessage({
-    required this.text,
-    required this.isUser,
-    required this.timestamp,
+    required this.role,
+    required this.content,
   });
 }

@@ -1,39 +1,36 @@
 import 'package:dio/dio.dart';
-import '../models/chat_message_model.dart';
+import 'auth_data_source.dart';
 
 abstract class ChatApiDataSource {
-  Future<List<ChatMessageModel>> sendMessage(String message);
+  Future<String> sendMessage(String message);
 }
 
 class ChatApiDataSourceImpl implements ChatApiDataSource {
   final Dio dio;
-  final String apiKey;
+  final AuthDataSource authDataSource;
 
-  ChatApiDataSourceImpl({required this.dio, required this.apiKey});
+  ChatApiDataSourceImpl({required this.dio, required this.authDataSource});
 
   @override
-  Future<List<ChatMessageModel>> sendMessage(String message) async {
+  Future<String> sendMessage(String message) async {
+    final token = await authDataSource.getAccessToken();
+
     final response = await dio.post(
       'https://gigachat.devices.sberbank.ru/api/v1/chat/completions',
+      options: Options(
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      ),
       data: {
         "model": "GigaChat",
         "messages": [
           {"role": "user", "content": message}
         ],
       },
-      options: Options(
-        headers: {
-          "Authorization": "Bearer $apiKey",
-          "Content-Type": "application/json",
-        },
-      ),
     );
 
-    final choices = response.data['choices'] as List;
-
-    return choices.map((choice) {
-      final msg = choice['message'];
-      return ChatMessageModel.fromJson(msg);
-    }).toList();
+    return response.data['choices'][0]['message']['content'];
   }
 }
