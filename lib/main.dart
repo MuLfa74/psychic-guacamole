@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
-import 'injection.dart';
-import 'app.dart'; // твой корневой виджет
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+import 'injection.dart' as di;
+import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await initDependencies();
+
+  await dotenv.load(fileName: ".env"); // загружаем переменные окружения
+  await di.init(); // инициализация зависимостей
+
   runApp(const MyApp());
 }

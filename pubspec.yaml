@@ -41,6 +41,7 @@ dependencies:
   intl: ^0.18.0
   flutter_dotenv: ^5.1.0
   uuid: 
+  http: 
 
 dev_dependencies:
   mockito: ^5.4.0

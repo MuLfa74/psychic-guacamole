@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import 'package:flutter_application_ai_chat/features/chat/data/datasources/chat_api_data_source.dart';
+import 'package:flutter_application_ai_chat/features/chat/data/datasources/api_data_source.dart';
 import 'package:flutter_application_ai_chat/features/chat/data/repositories/chat_repository_impl.dart';
 import 'package:flutter_application_ai_chat/features/chat/domain/entities/chat_message.dart';
 

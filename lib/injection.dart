@@ -1,31 +1,20 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
-import 'package:dio/dio.dart';
 
-import 'features/chat/data/datasources/chat_api_data_source.dart';
-import 'features/chat/data/datasources/auth_data_source.dart';
+import 'features/chat/data/datasources/api_data_source.dart';
+import 'features/chat/data/datasources/api_get_models.dart';
+import 'features/chat/data/datasources/api_get_token.dart';
+import 'features/chat/data/datasources/api_validate_func.dart';
 
 final sl = GetIt.instance;
 
-Future<void> initDependencies() async {
-  await dotenv.load(fileName: '.env');
+Future<void> init() async {
+  // Core
+  sl.registerLazySingleton(() => TokenManager());
 
-  final dio = Dio();
-  sl.registerLazySingleton(() => dio);
+  // Data Sources
+  sl.registerLazySingleton(() => ModelFetcher(sl()));
+  sl.registerLazySingleton(() => FunctionValidator(sl()));
+  sl.registerLazySingleton(() => ChatApiDataSource());
 
-  sl.registerLazySingleton<AuthDataSource>(
-    () => AuthDataSource(
-      dio: dio,
-      authKey: dotenv.env['AUTHORIZATION_KEY']!,
-    ),
-  );
-
-  sl.registerLazySingleton<ChatApiDataSource>(
-    () => ChatApiDataSourceImpl(
-      dio: dio,
-      authDataSource: sl<AuthDataSource>(),
-    ),
-  );
-
-  // + репозиторий, useCase и т.д.
+  // Тут можно добавить репозитории, use cases и т.д.
 }
