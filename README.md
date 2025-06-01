@@ -1,16 +1,16 @@
-# flutter_application_ai_chat
+# Чат-интерфейс с ИИ "Название_не_придумал"
 
-A new Flutter project.
+Проект для технологического конкурса "Умные мобильные решения: сенсорика, искусственный интеллект и интернет-взаимодействие".
+Задача реализовать чат-интерфейс с ИИ (прим. GigaChat).
+Хранение истории чата будет локальным в устройстве.
 
-## Getting Started
+## Flutter
 
-This project is a starting point for a Flutter application.
+Флаттер был выбран в качестве кросс-платформенного языка для платформ Android и устройств с ОС "Аврора".
 
-A few resources to get you started if this is your first Flutter project:
+## Модели
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Предполагается в проекте выбор модели, но пока за неимением других вариантов, кроме GigaChat, будет реализован только оный
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+ **/GigaChat**
+    ИИ помощник от Сбера, предоставляющий 1млн бесплатных токенов, а также полностью русскую документацию с удобными гайдами.
