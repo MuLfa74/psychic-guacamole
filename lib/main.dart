@@ -6,9 +6,7 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await dotenv.load(fileName: ".env"); // загружаем переменные окружения
-  await di.init(); // инициализация зависимостей
-
+  await dotenv.load();
+  await di.init(); // get_it инициализация
   runApp(const MyApp());
 }
