@@ -5,7 +5,6 @@ import 'package:flutter_application_ai_chat/features/chat/data/datasources/api_d
 
 void main() {
   setUpAll(() async {
-    TestWidgetsFlutterBinding.ensureInitialized();
     await dotenv.load(fileName: '.env'); // загрузка переменных окружения
   });
 
