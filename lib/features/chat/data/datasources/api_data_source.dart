@@ -28,7 +28,7 @@ class ChatApiDataSource {
         'RqUID': _tokenManager.generateRqUID(),
       },
       body: jsonEncode({
-        "model": "GigaChat:latest",
+        "model": "GigaChat",
         "messages": [
           {
             "role": "user",
@@ -40,6 +40,7 @@ class ChatApiDataSource {
         "n": 1,
         "stream": false,
       }),
+      encoding: utf8,
     );
 
     if (response.statusCode != 200) {

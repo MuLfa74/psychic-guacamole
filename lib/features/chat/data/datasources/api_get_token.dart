@@ -15,8 +15,8 @@ class TokenManager {
       if (now < _expiresAt!) return _accessToken!;
     }
 
-    final authKey = dotenv.env['AUTHORIZATION_KEY'];
-    if (authKey == null) throw Exception('AUTHORIZATION_KEY not set in .env');
+    final authKey = dotenv.env['GIGACHAT_APIKEY'];
+    if (authKey == null) throw Exception('GIGACHAT_APIKEY not set in .env');
 
     final response = await http.post(
       Uri.parse('https://ngw.devices.sberbank.ru:9443/api/v2/oauth'),
