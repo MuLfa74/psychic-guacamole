@@ -9,11 +9,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<List<ChatMessage>> sendMessage(String message) async {
-    final response = await apiDataSource.sendMessage(message); // вернёт String
+    final content = await apiDataSource.sendMessage(message);
 
     return [
-      ChatMessage(role: 'user', content: message),
-      ChatMessage(role: 'assistant', content: response),
+      ChatMessage(
+        role: 'assistant',
+        content: content,
+      ),
     ];
   }
 }

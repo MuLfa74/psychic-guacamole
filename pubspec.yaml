@@ -43,6 +43,7 @@ dependencies:
   uuid: 
   http: 
   hive:
+  path_provider: 
 
 dev_dependencies:
   mockito: ^5.4.0

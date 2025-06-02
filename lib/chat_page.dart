@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'features/chat/domain/usecases/send_message_usecase.dart';
+import 'injection.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -298,15 +300,19 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   late Box _box;
   late bool _isDarkTheme;
 
+  late final SendMessageUseCase _sendMessageUseCase;
+
   @override
   void initState() {
     super.initState();
     _box = Hive.box('chatBox');
     _messages = List<String>.from(_box.get(widget.chatName, defaultValue: []));
     _isDarkTheme = _box.get('isDarkTheme', defaultValue: true);
+
+    _sendMessageUseCase = sl<SendMessageUseCase>(); // <-- инициализация через GetIt
   }
 
-  void _sendMessage() {
+  Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isNotEmpty) {
       setState(() {
@@ -314,6 +320,22 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         _controller.clear();
         _box.put(widget.chatName, _messages);
       });
+
+      // Отправка сообщения через usecase и добавление ответа ассистента
+      if (_sendMessageUseCase != null) {
+        final aiMessages = await _sendMessageUseCase.call(text);
+        if (aiMessages.isNotEmpty) {
+          setState(() {
+            // Добавляем только текст ответа ассистента
+            _messages.addAll(
+              aiMessages
+                  .where((msg) => msg.role == 'assistant')
+                  .map((msg) => msg.content),
+            );
+            _box.put(widget.chatName, _messages);
+          });
+        }
+      }
     }
   }
 
