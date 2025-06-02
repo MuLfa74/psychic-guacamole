@@ -18,6 +18,6 @@
 # Предотчеты
 
 ## v1
-[Демо оболочки без внедрения API](https://youtu.be/k8lhKYUM1Cc)
-Сама API работает, запросы доходят до GigaChat (см. скрин 1)
-![скрин 1](https://ibb.co/4Z5xtWsc)
+[Демо оболочки без внедрения API](https://youtu.be/k8lhKYUM1Cc) <br/>
+Сама API работает, запросы доходят до GigaChat (см. скрин ниже) <br/>
+<a href="https://ibb.co/4Z5xtWsc"><img src="https://i.ibb.co/SX9pyNQ2/photo-2025-06-02-14-44-45.jpg" alt="photo-2025-06-02-14-44-45" border="0"></a>
