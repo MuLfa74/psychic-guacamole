@@ -43,7 +43,8 @@ dependencies:
   uuid: 
   http: 
   hive:
-  path_provider: 
+  path_provider:
+  flutter_markdown:
 
 dev_dependencies:
   mockito: ^5.4.0

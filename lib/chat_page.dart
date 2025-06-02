@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'features/chat/domain/usecases/send_message_usecase.dart';
 import 'injection.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 class ChatPage extends StatefulWidget {
   const ChatPage({super.key});
@@ -224,57 +225,57 @@ class _ChatPageState extends State<ChatPage> with SingleTickerProviderStateMixin
             ),
             title: _isSearching
                 ? TextField(
-              controller: _searchController,
-              autofocus: true,
-              decoration: InputDecoration(
-                hintText: 'Поиск чатов...',
-                hintStyle: TextStyle(color: _isDarkTheme ? Colors.white70 : Colors.black54),
-                border: InputBorder.none,
-              ),
-              style: TextStyle(color: _isDarkTheme ? Colors.white : Colors.black, fontSize: 20),
-            )
+                    controller: _searchController,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Поиск чатов...',
+                      hintStyle: TextStyle(color: _isDarkTheme ? Colors.white70 : Colors.black54),
+                      border: InputBorder.none,
+                    ),
+                    style: TextStyle(color: _isDarkTheme ? Colors.white : Colors.black, fontSize: 20),
+                  )
                 : const Text("GigaChat", style: TextStyle(fontSize: 24)),
             actions: [
               _isSearching
                   ? IconButton(
-                icon: const Icon(Icons.close, size: 30),
-                onPressed: _stopSearch,
-              )
+                      icon: const Icon(Icons.close, size: 30),
+                      onPressed: _stopSearch,
+                    )
                   : IconButton(
-                icon: const Icon(Icons.search, size: 30),
-                onPressed: _startSearch,
-              )
+                      icon: const Icon(Icons.search, size: 30),
+                      onPressed: _startSearch,
+                    )
             ],
             centerTitle: true,
           ),
           body: _filteredChats.isEmpty
               ? const Center(child: Text("Создай чат", style: TextStyle(fontSize: 22)))
               : ListView.builder(
-            itemCount: _filteredChats.length,
-            itemBuilder: (context, index) {
-              final chatTile = Card(
-                margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                color: chatCardColor,
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  title: Text(
-                    _filteredChats[index],
-                    style: TextStyle(fontSize: 22, color: chatTextColor),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(Icons.more_vert, color: chatTextColor, size: 28),
-                    onPressed: () => _showChatMenu(index),
-                  ),
-                  onTap: () => _openChat(_filteredChats[index]),
-                ),
-              );
+                  itemCount: _filteredChats.length,
+                  itemBuilder: (context, index) {
+                    final chatTile = Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      color: chatCardColor,
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        title: Text(
+                          _filteredChats[index],
+                          style: TextStyle(fontSize: 22, color: chatTextColor),
+                        ),
+                        trailing: IconButton(
+                          icon: Icon(Icons.more_vert, color: chatTextColor, size: 28),
+                          onPressed: () => _showChatMenu(index),
+                        ),
+                        onTap: () => _openChat(_filteredChats[index]),
+                      ),
+                    );
 
-              return _animatingChatIndex == index
-                  ? SlideTransition(position: _offsetAnimation, child: chatTile)
-                  : chatTile;
-            },
-          ),
+                    return _animatingChatIndex == index
+                        ? SlideTransition(position: _offsetAnimation, child: chatTile)
+                        : chatTile;
+                  },
+                ),
           floatingActionButton: FloatingActionButton(
             onPressed: _createChat,
             child: const Icon(Icons.add, size: 30),
@@ -355,30 +356,36 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
             Expanded(
               child: _messages.isEmpty
                   ? Center(
-                child: Text(
-                  'Начни диалог с ИИ-помощником',
-                  style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 18),
-                ),
-              )
+                      child: Text(
+                        'Начни диалог с ИИ-помощником',
+                        style: TextStyle(color: textColor.withOpacity(0.6), fontSize: 18),
+                      ),
+                    )
                   : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: _messages.length,
-                itemBuilder: (context, index) => Align(
-                  alignment: Alignment.centerLeft,
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: messageBubbleColor,
-                      borderRadius: BorderRadius.circular(14),
+                      padding: const EdgeInsets.all(16),
+                      itemCount: _messages.length,
+                      itemBuilder: (context, index) => Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: messageBubbleColor,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: MarkdownBody(
+                            data: _messages[index],
+                            styleSheet: MarkdownStyleSheet.fromTheme(
+                              Theme.of(context).copyWith(
+                                textTheme: Theme.of(context).textTheme.apply(
+                                      bodyColor: textColor,
+                                    ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                    child: Text(
-                      _messages[index],
-                      style: TextStyle(color: textColor, fontSize: 18),
-                    ),
-                  ),
-                ),
-              ),
             ),
             SafeArea(
               child: Container(
