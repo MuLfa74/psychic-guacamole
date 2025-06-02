@@ -21,3 +21,8 @@
 [Демо оболочки без внедрения API](https://youtu.be/k8lhKYUM1Cc) <br/>
 Сама API работает, запросы доходят до GigaChat (см. скрин ниже) <br/>
 <a href="https://ibb.co/4Z5xtWsc"><img src="https://i.ibb.co/SX9pyNQ2/photo-2025-06-02-14-44-45.jpg" alt="photo-2025-06-02-14-44-45" border="0"></a>
+## v2
+API привязана к оболочке, модель отвечает в чате, история сохраняется (см. скрины ниже). Текст пока без форматирования.<br/>
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/wFVCZ3PF/photo-2025-06-02-21-23-53.jpg" alt="photo-2025-06-02-21-23-53" border="0"></a> <br/>
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/HwtvKzz/photo-2025-06-02-21-25-30.jpg" alt="photo-2025-06-02-21-25-30" border="0"></a> <br/>
+<a href="https://imgbb.com/"><img src="https://i.ibb.co/bgV4KS19/photo-2025-06-02-21-26-25.jpg" alt="photo-2025-06-02-21-26-25" border="0"></a>
