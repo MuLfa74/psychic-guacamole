@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'httpTestClient.dart' as httpTest;
 import 'api_get_token.dart';
 
 class ModelFetcher {
@@ -10,7 +11,7 @@ class ModelFetcher {
   Future<List<String>> getModels() async {
     final token = await tokenManager.getAccessToken();
 
-    final response = await http.get(
+    final response = await httpTest.httpClient.get(
       Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/models'),
       headers: {
         'Authorization': 'Bearer $token',
