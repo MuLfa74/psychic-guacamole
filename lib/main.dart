@@ -8,12 +8,12 @@ import 'app.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  
+  await dotenv.load();
   final dir = await getApplicationDocumentsDirectory();
   Hive.init(dir.path);
   await Hive.openBox('chatBox');
 
-  // await dotenv.load(); // Используем позже для API ключей
   await di.init();
   runApp(const MyApp());
 }

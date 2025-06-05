@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'httpTestClient.dart' as httpTest;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/io_client.dart';
+import 'http_cert_client.dart';
 import 'package:uuid/uuid.dart';
 
 class TokenManager {
@@ -11,15 +11,18 @@ class TokenManager {
   final _uuid = const Uuid();
 
   Future<String> getAccessToken() async {
+    final http = await createSecureClient();
+    final client = IOClient(http);
+
     if (_accessToken != null && _expiresAt != null) {
       final now = DateTime.now().millisecondsSinceEpoch;
       if (now < _expiresAt!) return _accessToken!;
     }
 
-    String authKey = 'YzZmMGY0YTYtNWJiNC00ZTBkLTljOGYtNjkwOTAxNzhhNjlmOjE2Zjc3ZGE5LTNlNTgtNGQ4NS05Mjk0LWZjMzFkMTk0OWRjNQ==';
+    final authKey = dotenv.env['GIGACHAT_APIKEY'];
     if (authKey == null) throw Exception('GIGACHAT_APIKEY not set in .env');
 
-    final response = await httpTest.httpClient.post(
+    final response = await client.post(
       Uri.parse('https://ngw.devices.sberbank.ru:9443/api/v2/oauth'),
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
