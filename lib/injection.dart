@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 
+import 'features/chat/data/datasources/get_cert.dart';
 import 'features/chat/data/datasources/api_data_source.dart';
 import 'features/chat/data/datasources/api_get_models.dart';
 import 'features/chat/data/datasources/api_get_token.dart';
@@ -15,6 +16,7 @@ Future<void> init() async {
   sl.registerLazySingleton(() => TokenManager());
 
   // Data Sources
+  await getCertFile();
   sl.registerLazySingleton(() => ModelFetcher(sl()));
   sl.registerLazySingleton(() => FunctionValidator(sl()));
   sl.registerLazySingleton(() => ChatApiDataSource());

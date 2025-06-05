@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'httpTestClient.dart' as httpTest;
+import 'http_cert_client.dart';
+import 'package:http/io_client.dart';
 
 import 'api_get_token.dart';
 import 'api_get_models.dart';
@@ -18,9 +18,11 @@ class ChatApiDataSource {
       _validator.validateFunction(json);
 
   Future<String> sendMessage(String userMessage) async {
+    final http = await createSecureClient();
+    final client = IOClient(http);
     final token = await _tokenManager.getAccessToken();
 
-    final response = await httpTest.httpClient.post(
+    final response = await client.post(
       Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/chat/completions'),
       headers: {
         'Authorization': 'Bearer $token',
