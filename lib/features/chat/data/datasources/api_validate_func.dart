@@ -1,16 +1,23 @@
 import 'dart:convert';
-import 'http_cert_client.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'api_get_token.dart';
+import 'http_cert_client.dart';
+
+typedef SecureClientFactory = Future<http.Client> Function();
 
 class FunctionValidator {
   final TokenManager tokenManager;
+  final SecureClientFactory _clientFactory;
 
-  FunctionValidator(this.tokenManager);
+  FunctionValidator(this.tokenManager, {SecureClientFactory? clientFactory})
+      : _clientFactory = clientFactory ?? _createSecureClient;
+
+  static Future<http.Client> _createSecureClient() async =>
+      IOClient(await createSecureClient());
 
   Future<List<String>> validateFunction(Map<String, dynamic> functionJson) async {
-    final http = await createSecureClient();
-    final client = IOClient(http);
+    final client = await _clientFactory();
     final token = await tokenManager.getAccessToken();
 
     final response = await client.post(

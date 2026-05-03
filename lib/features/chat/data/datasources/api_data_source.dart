@@ -1,16 +1,35 @@
 import 'dart:convert';
-import 'http_cert_client.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
 import 'api_get_token.dart';
 import 'api_get_models.dart';
 import 'api_validate_func.dart';
+import 'http_cert_client.dart';
+
+typedef SecureClientFactory = Future<http.Client> Function();
 
 class ChatApiDataSource {
-  final TokenManager _tokenManager = TokenManager();
+  final TokenManager _tokenManager;
+  final SecureClientFactory _clientFactory;
+  late final ModelFetcher _modelFetcher;
+  late final FunctionValidator _validator;
 
-  late final ModelFetcher _modelFetcher = ModelFetcher(_tokenManager);
-  late final FunctionValidator _validator = FunctionValidator(_tokenManager);
+  ChatApiDataSource({
+    TokenManager? tokenManager,
+    ModelFetcher? modelFetcher,
+    FunctionValidator? validator,
+    SecureClientFactory? clientFactory,
+  })  : _clientFactory = clientFactory ?? _createSecureClient,
+        _tokenManager = tokenManager ?? TokenManager(clientFactory: clientFactory) {
+    _modelFetcher =
+        modelFetcher ?? ModelFetcher(_tokenManager, clientFactory: clientFactory);
+    _validator =
+        validator ?? FunctionValidator(_tokenManager, clientFactory: clientFactory);
+  }
+
+  static Future<http.Client> _createSecureClient() async =>
+      IOClient(await createSecureClient());
 
   Future<List<String>> getAvailableModels() => _modelFetcher.getModels();
 
@@ -18,8 +37,7 @@ class ChatApiDataSource {
       _validator.validateFunction(json);
 
   Future<String> sendMessage(String userMessage) async {
-    final http = await createSecureClient();
-    final client = IOClient(http);
+    final client = await _clientFactory();
     final token = await _tokenManager.getAccessToken();
 
     final response = await client.post(

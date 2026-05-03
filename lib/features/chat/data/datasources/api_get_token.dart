@@ -1,18 +1,28 @@
 import 'dart:convert';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 import 'http_cert_client.dart';
 import 'package:uuid/uuid.dart';
+
+typedef SecureClientFactory = Future<http.Client> Function();
 
 class TokenManager {
   String? _accessToken;
   int? _expiresAt;
 
-  final _uuid = const Uuid();
+  final Uuid _uuid;
+  final SecureClientFactory _clientFactory;
+
+  TokenManager({SecureClientFactory? clientFactory, Uuid? uuid})
+      : _clientFactory = clientFactory ?? _createSecureClient,
+        _uuid = uuid ?? const Uuid();
+
+  static Future<http.Client> _createSecureClient() async =>
+      IOClient(await createSecureClient());
 
   Future<String> getAccessToken() async {
-    final http = await createSecureClient();
-    final client = IOClient(http);
+    final client = await _clientFactory();
 
     if (_accessToken != null && _expiresAt != null) {
       final now = DateTime.now().millisecondsSinceEpoch;
