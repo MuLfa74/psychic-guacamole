@@ -35,7 +35,7 @@ class FunctionValidator {
       throw Exception('Failed to validate function: ${response.body}');
     }
 
-    final json = jsonDecode(response.body);
+    final json = jsonDecode(utf8.decode(response.bodyBytes));
     return (json['errors'] as List).map((e) => e['message'] as String).toList();
   }
 }
