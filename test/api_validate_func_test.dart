@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -8,10 +7,6 @@ import 'package:flutter_application_ai_chat/features/chat/data/datasources/api_v
 import 'package:flutter_application_ai_chat/features/chat/data/datasources/api_get_token.dart';
 
 void main() {
-  setUp(() {
-    dotenv.env.clear();
-    dotenv.env['GIGACHAT_APIKEY'] = 'test-key';
-  });
 
   test('returns error messages when validation endpoint returns errors', () async {
     final tokenClient = MockClient((request) async {

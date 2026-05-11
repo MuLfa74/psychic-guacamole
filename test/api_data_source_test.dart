@@ -5,14 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:flutter_application_ai_chat/features/chat/data/datasources/api_data_source.dart';
+import 'package:flutter_application_ai_chat/features/chat/domain/entities/chat_request.dart';
+import 'package:flutter_application_ai_chat/features/chat/domain/entities/chat_message.dart';
+import 'package:flutter_application_ai_chat/features/chat/domain/enums/chat_role.dart';
+import 'package:flutter_application_ai_chat/features/chat/domain/enums/chat_message_type.dart';
 
 void main() {
-  setUp(() {
-    dotenv.env.clear();
-    dotenv.env['GIGACHAT_APIKEY'] = 'test-key';
-  });
-
-  test('sendMessage returns assistant content from chat completions', () async {
+  dotenv.load();
+  test('sendMessage returns ChatResponse with assistant content', () async {
     final clientFactory = () async => MockClient((request) async {
       if (request.url.path == '/api/v2/oauth') {
         return http.Response(
@@ -33,17 +33,30 @@ void main() {
             'message': {
               'content': 'Вот ваше изображение готово',
               'role': 'assistant',
-            }
+            },
+            'finish_reason': 'stop',
           }
         ]
       });
-      return http.Response(responseBody, 200);
+      return http.Response.bytes(utf8.encode(responseBody), 200);
     });
 
     final dataSource = ChatApiDataSource(clientFactory: clientFactory);
-    final result = await dataSource.sendMessage('Нарисуй розового кота');
+    final request = ChatRequest(
+      model: 'GigaChat',
+      messages: [
+        ChatMessage(
+          role: ChatRole.user,
+          type: ChatMessageType.text,
+          content: 'Нарисуй розового кота',
+        ),
+      ],
+    );
+    final result = await dataSource.sendMessage(request);
 
-    expect(result, 'Вот ваше изображение готово');
+    expect(result.messages.isNotEmpty, true);
+    expect(result.messages[0].content, 'Вот ваше изображение готово');
+    expect(result.finishReason, 'stop');
   });
 
   test('getAvailableModels returns model ids', () async {
@@ -96,7 +109,7 @@ void main() {
           {'message': 'Неверная сигнатура функции'},
         ],
       });
-      return http.Response(responseBody, 200);
+      return http.Response.bytes(utf8.encode(responseBody), 200);
     });
 
     final dataSource = ChatApiDataSource(clientFactory: clientFactory);
@@ -121,9 +134,19 @@ void main() {
     });
 
     final dataSource = ChatApiDataSource(clientFactory: clientFactory);
+    final request = ChatRequest(
+      model: 'GigaChat',
+      messages: [
+        ChatMessage(
+          role: ChatRole.user,
+          type: ChatMessageType.text,
+          content: 'Привет',
+        ),
+      ],
+    );
 
     expect(
-      dataSource.sendMessage('Привет'),
+      dataSource.sendMessage(request),
       throwsA(
         isA<Exception>().having(
           (e) => e.toString(),
