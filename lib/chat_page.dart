@@ -323,19 +323,25 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
       });
 
       // Отправка сообщения через usecase и добавление ответа ассистента
-      if (_sendMessageUseCase != null) {
-        final aiMessages = await _sendMessageUseCase.call(text);
-        if (aiMessages.isNotEmpty) {
+      try {
+        final response = await _sendMessageUseCase.call(text);
+        if (response.messages.isNotEmpty) {
           setState(() {
             // Добавляем только текст ответа ассистента
             _messages.addAll(
-              aiMessages
-                  .where((msg) => msg.role == 'assistant')
+              response.messages
+                  .where((msg) => msg.role.toJson() == 'assistant')
                   .map((msg) => msg.content),
             );
             _box.put(widget.chatName, _messages);
           });
         }
+      } catch (e) {
+        // Обработка ошибок
+        setState(() {
+          _messages.add('Ошибка: ${e.toString()}');
+          _box.put(widget.chatName, _messages);
+        });
       }
     }
   }

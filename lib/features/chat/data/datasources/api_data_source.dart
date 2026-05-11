@@ -2,6 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
+import '../../domain/entities/chat_request.dart';
+import '../../domain/entities/chat_response.dart';
+import '../models/chat_response_model.dart';
+import '../models/generated_image_model.dart';
+import '../models/stored_file_model.dart';
 import 'api_get_token.dart';
 import 'api_get_models.dart';
 import 'api_validate_func.dart';
@@ -36,9 +41,31 @@ class ChatApiDataSource {
   Future<List<String>> validateFunction(Map<String, dynamic> json) =>
       _validator.validateFunction(json);
 
-  Future<String> sendMessage(String userMessage) async {
+  /// Отправить ChatRequest в GigaChat API
+  Future<ChatResponse> sendMessage(ChatRequest request) async {
     final client = await _clientFactory();
     final token = await _tokenManager.getAccessToken();
+
+    final body = <String, dynamic>{
+      'model': request.model,
+      'messages': request.messages
+          .map((m) => {
+                'role': m.role.toJson(),
+                'content': m.content,
+              })
+          .toList(),
+      'temperature': request.temperature ?? 1.0,
+      'top_p': request.topP ?? 0.9,
+      'n': request.n ?? 1,
+      'stream': request.stream ?? false,
+    };
+
+    if (request.functionCall != null) {
+      body['function_call'] = request.functionCall!;
+    }
+    if (request.attachments != null && request.attachments!.isNotEmpty) {
+      body['attachments'] = request.attachments!;
+    }
 
     final response = await client.post(
       Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/chat/completions'),
@@ -48,19 +75,7 @@ class ChatApiDataSource {
         'Accept': 'application/json',
         'RqUID': _tokenManager.generateRqUID(),
       },
-      body: jsonEncode({
-        "model": "GigaChat",
-        "messages": [
-          {
-            "role": "user",
-            "content": userMessage,
-          }
-        ],
-        "temperature": 1,
-        "top_p": 0.9,
-        "n": 1,
-        "stream": false,
-      }),
+      body: jsonEncode(body),
       encoding: utf8,
     );
 
@@ -68,7 +83,105 @@ class ChatApiDataSource {
       throw Exception('Failed to get chat response: ${response.body}');
     }
 
-    final json = jsonDecode(response.body);
-    return json['choices'][0]['message']['content'] as String;
+    final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    return ChatResponseModel.fromJson(json);
+  }
+
+  /// Загрузить файл в хранилище GigaChat
+  Future<StoredFileModel> uploadFile(String filePath, {String purpose = 'general'}) async {
+    throw UnimplementedError('Метод uploadFile требует реализации работы с файловой системой');
+  }
+
+  /// Получить список всех файлов
+  Future<List<StoredFileModel>> getFiles() async {
+    final client = await _clientFactory();
+    final token = await _tokenManager.getAccessToken();
+
+    final response = await client.get(
+      Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/files'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get files list: ${response.body}');
+    }
+
+    final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    final data = json['data'] as List;
+    return data.map((f) => StoredFileModel.fromJson(f as Map<String, dynamic>)).toList();
+  }
+
+  /// Получить информацию о конкретном файле
+  Future<StoredFileModel> getFileInfo(String fileId) async {
+    final client = await _clientFactory();
+    final token = await _tokenManager.getAccessToken();
+
+    final response = await client.get(
+      Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/files/$fileId'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to get file info: ${response.body}');
+    }
+
+    final json = jsonDecode(utf8.decode(response.bodyBytes)) as Map<String, dynamic>;
+    return StoredFileModel.fromJson(json);
+  }
+
+  /// Скачать содержимое файла (изображение, документ и т.д.)
+  Future<GeneratedImageModel> downloadFileContent(String fileId) async {
+    final client = await _clientFactory();
+    final token = await _tokenManager.getAccessToken();
+
+    final response = await client.get(
+      Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/files/$fileId/content'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/jpg',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to download file: ${response.body}');
+    }
+
+    return GeneratedImageModel(
+      id: fileId,
+      content: response.bodyBytes,
+      mimeType: response.headers['content-type'] ?? 'application/octet-stream',
+      bytes: response.contentLength ?? response.bodyBytes.length,
+    );
+  }
+
+  /// Удалить файл из хранилища
+  Future<void> deleteFile(String fileId) async {
+    final client = await _clientFactory();
+    final token = await _tokenManager.getAccessToken();
+
+    final response = await client.post(
+      Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/files/$fileId/delete'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to delete file: ${response.body}');
+    }
+  }
+
+  /// Вспомогательный метод для извлечения imageId из <img src="...">
+  static String? extractImageId(String content) {
+    final regex = RegExp(r'<img\s+src="([^"]+)"');
+    final match = regex.firstMatch(content);
+    return match?.group(1);
   }
 }
