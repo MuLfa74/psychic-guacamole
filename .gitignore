@@ -46,4 +46,4 @@ app.*.map.json
 .idea/
 .metadata
 analysis_options.yaml
-pubsec.lock
+pubspec.lock
