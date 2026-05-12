@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
 
+import 'dart:io';
 import '../../domain/entities/chat_request.dart';
 import '../../domain/entities/chat_response.dart';
 import '../models/chat_response_model.dart';
@@ -89,9 +90,37 @@ class ChatApiDataSource {
 
   /// Загрузить файл в хранилище GigaChat
   Future<StoredFileModel> uploadFile(String filePath, {String purpose = 'general'}) async {
-    throw UnimplementedError('Метод uploadFile требует реализации работы с файловой системой');
-  }
+    final client = await _clientFactory();
+    final token = await _tokenManager.getAccessToken();
+    final url = Uri.parse('https://gigachat.devices.sberbank.ru/api/v1/files');
+    final request = http.MultipartRequest('POST', url);
 
+    request.headers.addAll({
+      'Authorization': 'Bearer $token',
+    });
+
+    request.fields['purpose'] = purpose;
+
+    final file = File(filePath);
+    if (!await file.exists()) {
+      throw Exception("Файл не найден по пути: $filePath");}
+    final bytes = await file.readAsBytes();
+    
+    request.files.add(http.MultipartFile.fromBytes(
+      'file',
+      bytes,
+      filename: filePath.split('/').last,
+    ));
+
+    final streamedResponse = await client.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      return StoredFileModel.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Ошибка загрузки: ${response.statusCode} ${response.body}');
+    }
+}
   /// Получить список всех файлов
   Future<List<StoredFileModel>> getFiles() async {
     final client = await _clientFactory();
